@@ -1,0 +1,11 @@
+AddDefaultCharset UTF-8
+
+Options -Indexes
+DirectoryIndex index-dev.html
+
+# Redirect all to index.html
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !(/images|/resources|robots\.txt|sitemap\.xml|favicon\.ico)
+RewriteRule ^.*$ /index-dev.html [L]

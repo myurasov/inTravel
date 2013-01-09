@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>inTravel</title>
+    <meta name="viewport" content="initial-scale=1,user-scalable=no,width=device-width">
+    <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
+    <script type="text/javascript" src="utils.js"></script>
+    <script type="text/javascript" src="main.js"></script>
+
+    <script src="http://static.opentok.com/v0.91/js/TB.min.js"></script>
+
+    <script type="text/javascript">
+
+      var iOS = ( navigator.userAgent.match(/(iPad|iPhone|iPod)/i) ? true : false );
+
+      if (!iOS) {
+        var apiKey = '22462912';
+        var sessionId = '2_MX4yMTg4MTk0Mn4xMjcuMC4wLjF-V2VkIEphbiAwOSAxMzo1MDoyMyBQU1QgMjAxM34wLjM5MTU2MTU3fg';
+        var token = 'T1==cGFydG5lcl9pZD0yMTg4MTk0MiZzaWc9NjNiODUzY2NlYzdjNzA4YTJiZGUwNzA2MmI5MWY1NjlhNDJiNDE5ODpzZXNzaW9uX2lkPTJfTVg0eU1UZzRNVGswTW40eE1qY3VNQzR3TGpGLVYyVmtJRXBoYmlBd09TQXhNem8xTURveU15QlFVMVFnTWpBeE0zNHdMak01TVRVMk1UVTNmZyZjcmVhdGVfdGltZT0xMzU3NzY4MjU5JmV4cGlyZV90aW1lPTEzNjAzNjAyNTkmcm9sZT1wdWJsaXNoZXImbm9uY2U9MTY3Njg0JnNka192ZXJzaW9uPXRiLWRhc2hib2FyZC1qYXZhc2NyaXB0LXYx';
+
+        TB.setLogLevel(TB.DEBUG);
+
+        var session = TB.initSession(sessionId);
+        session.addEventListener('sessionConnected', sessionConnectedHandler);
+        session.addEventListener('streamCreated', streamCreatedHandler);
+        session.connect(apiKey, token);
+
+        var publisher;
+
+        function sessionConnectedHandler(event) {
+          publisher = TB.initPublisher(apiKey, 'video');
+          session.publish(publisher);
+
+          // Subscribe to streams that were in the session when we connected
+          subscribeToStreams(event.streams);
+        }
+
+        function streamCreatedHandler(event) {
+          // Subscribe to any new streams that are created
+          subscribeToStreams(event.streams);
+        }
+
+        function subscribeToStreams(streams) {
+          for (var i = 0; i < streams.length; i++) {
+            // Make sure we don't subscribe to ourself
+            if (streams[i].connection.connectionId == session.connection.connectionId) {
+              return;
+            }
+
+            // Create the div to put the subscriber element in to
+            var div = document.createElement('div');
+            div.setAttribute('id', 'stream' + streams[i].streamId);
+            document.getElementById('videos').appendChild(div);
+
+            // Subscribe to the stream
+            session.subscribe(streams[i], div.id);
+          }
+        }
+      }
+
+    </script>
+
+    <link type="text/css" rel="stylesheet" href="main.css">
+  </head>
+  <body onload="new intravel()">
+    <div pub-key="pub-a29834f0-2cd0-40a3-b0e4-5564a7c38df4" sub-key="sub-e4cc5bb3-9372-11e1-b75e-09816d97dcf7" ssl="off" origin="pubsub.pubnub.com" id="pubnub"></div>
+    <script type="text/javascript" src="pubnub-3.1.js"></script>
+    <div id="header">
+      <div id="address">Locating...</div>
+      <div id="ago"></div>
+    </div>
+    <div id="map" style="float: right"></div>
+    <div id="videos" style="position: absolute;
+         bottom: 0px;
+         margin-left: 5px;">
+      <div id="video"></div>
+    </div>
+  </body>
+</html>
